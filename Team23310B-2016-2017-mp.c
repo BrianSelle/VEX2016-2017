@@ -630,6 +630,10 @@ void pivotTurnLeftEncoder(float turnAngleDegrees, int maxPower)
 	}
 }
 
+float getGyroAngleDeg() {
+	return (float)SensorValue[GYRO] * GYRO_FUDGE_FACTOR / 10.0;
+}
+
 void updateStraightController(float time, float position, float velocity, float acceleration, int itp) {
 	// Loop for itp times at 1ms then go get next point
 	for (int j = 0; j < (int)itp; j++)
@@ -639,14 +643,14 @@ void updateStraightController(float time, float position, float velocity, float 
 		int leftWheelCount = SensorValue[DRIVE_LEFT_ENCODER];
 		int positionCount = round(ENCODER_COUNTS_PER_INCH * position);
   	int distanceCountError =  positionCount - (rightWheelCount + leftWheelCount) / 2;
-		int turnCountError = leftWheelCount - rightWheelCount;
-		float turnAngleError = (float)SensorValue[GYRO] * GYRO_FUDGE_FACTOR / 10.0 - absoluteGyroAngle;
+		int turnCountError = rightWheelCount - leftWheelCount;
+		float turnAngleError = absoluteGyroAngle - getGyroAngleDeg();
 
 		// Calculate the motor power using K terms
 		int distanceMotorPower = limitMotorPower(distanceCountError * MP_STRAIGHT_KP + velocity * MP_STRAIGHT_KV + acceleration * MP_STRAIGHT_KA, 127);
 		int turnMotorPower = turnCountError * MP_STRAIGHT_KT + turnAngleError * MP_STRAIGHT_KG;
-		int leftMotorPower = distanceMotorPower - turnMotorPower;
-		int rightMotorPower = distanceMotorPower + turnMotorPower;
+		int leftMotorPower = distanceMotorPower + turnMotorPower;
+		int rightMotorPower = distanceMotorPower - turnMotorPower;
 
 		setDriveMotorPower(leftMotorPower, rightMotorPower);
 /*
@@ -667,7 +671,7 @@ void updateTurnController(float time, float position, float velocity, float acce
 	for (int j = 0; j < (int)itp; j++)
 	{
 		// Update count error
-		float turnGyroError = position - (float)SensorValue[GYRO] * GYRO_FUDGE_FACTOR / 10.0;
+		float turnGyroError = position - getGyroAngleDeg();
 
 		// Calculate the motor power using K terms
 		int turnMotorPower = limitMotorPower(turnGyroError * MP_TURN_KP + velocity * MP_TURN_KV + acceleration * MP_TURN_KA, 127);
@@ -843,7 +847,7 @@ void tankTurnGyroMPAbsolute(float targetAngleDegrees, float maxTurnRateDegPerSec
 		targetAngleDegrees = -targetAngleDegrees;
 	}
 
-	calculateMP(SensorValue[GYRO], targetAngleDegrees, maxTurnRateDegPerSecond, false);
+	calculateMP(getGyroAngleDeg(), targetAngleDegrees, maxTurnRateDegPerSecond, false);
 }
 
 //++++++++++++++++++++++++++++++++++++++++++| LCD DISPLAY |+++++++++++++++++++++++++++++++++++++++++++++
@@ -858,7 +862,7 @@ void updateDisplay()
 	int leftWheelCount = SensorValue[DRIVE_LEFT_ENCODER];
 	int rightWheelCount = -SensorValue[DRIVE_RIGHT_ENCODER];
 	float secondBatteryVoltageRaw = (float)SensorValue[BATTERY_2];
-	float gyroRaw = (float)SensorValue[GYRO] * GYRO_FUDGE_FACTOR / 10.0;
+	float gyroRaw = getGyroAngleDeg();
 	int armPotValue = SensorValue[LIFTARM_POT];
  	int clawPotValue = SensorValue[CLAW_POT];
 
@@ -1268,7 +1272,9 @@ task usercontrol()
 		}
     else if(vexRT[Btn8R] == 1)
     {
-    	tankTurnGyroMP(90, MP_AUTON_TURN_RATE);
+			SensorValue[GYRO] = 0;
+    	tankTurnGyroMPAbsolute(-90, MP_AUTON_TURN_RATE);
+    	tankTurnGyroMPAbsolute(-180, MP_AUTON_TURN_RATE);
 		}
 
 		if(vexRT[Btn5DXmtr2] == 1)
