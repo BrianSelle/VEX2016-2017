@@ -108,7 +108,7 @@ int previousDistanceCountError = 0;
 float MP_STRAIGHT_KP = 0.7;		// Position P gain
 float MP_STRAIGHT_KV = 1.7;		// Velocity gain
 float MP_STRAIGHT_KA = 0.09;	// Acceleration gain
-float MP_STRAIGHT_KG = 10.0;	// Gyro turn gain  20.0
+float MP_STRAIGHT_KG = 5.0;	  // Gyro turn gain
 float MP_STRAIGHT_KT = 0.0;   // Encoder turn gain
 float MP_AUTON_STRAIGHT_SPEED = 30;
 
@@ -1266,9 +1266,8 @@ task usercontrol()
 
 		if(vexRT[Btn8L] == 1)
     {
-    	moveStraightMP(72, MP_AUTON_STRAIGHT_SPEED);
-   		tankTurnGyroMP(180, 150);
-    	moveStraightMP(24, MP_AUTON_STRAIGHT_SPEED);
+			SensorValue[GYRO] = 0;
+    	moveStraightMPAbsolute(72, MP_AUTON_STRAIGHT_SPEED, 0);
 		}
     else if(vexRT[Btn8R] == 1)
     {
