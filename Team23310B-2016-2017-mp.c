@@ -56,6 +56,7 @@ int CLAW_CLOSE = 360.0;
 int CLAW_MID = 1000.0;
 int CLAW_OPEN = 1450.0;
 int CLAW_STRAIGHT = 1760;
+int CLAW_AUTON_RELEASE = 2500;
 int CLAW_AUTON = 2800.0;
 int CLAW_ERROR_TOLERANCE = 50;
 
@@ -75,6 +76,7 @@ float LIFTARM_FF = -0.1;
 
 int LIFTARM_PICKUP = 350.0;
 int LIFTARM_CLIMB_LOAD = 925.0;
+int LIFTARM_LOW_HOLD = 700.0;
 int LIFTARM_HOLD = 1600.0; // 1800;
 int LIFTARM_DUMP = 2800.0;
 int LIFTARM_STAR_LIFT_LOW = 1000.0;
@@ -367,6 +369,11 @@ void closeClawArmHoldPosition() {
 void armDumpPositionOpenClaw() {
 	setLiftArmTarget(LIFTARM_DUMP, false);
 	setClawTargetDelayed(CLAW_OPEN, LIFTARM_DUMP_CLAW_OPEN);
+}
+
+void armDumpPositionOpenClawDelayed(int delay) {
+	setLiftArmTargetDelayed(LIFTARM_DUMP, delay);
+	setClawTargetDelayed(CLAW_OPEN, LIFTARM_DUMP_CLAW_OPEN );
 }
 
 //++++++++++++++++++++++++++++++++++++++++| DRIVE WITH ENCODERS |++++++++++++++++++++++++++++++++++++++++++++
@@ -927,98 +934,95 @@ void pre_auton()
 //
 /////////////////////////////////////////////////////////////////////////////////////////
 
+void autonCloseClawBackupDumpReturn() {
+		setClawTarget(CLAW_CLOSE, false);
+	  setLiftArmTargetDelayed(LIFTARM_LOW_HOLD, 700);
+    wait1Msec(1000);
+		armDumpPositionOpenClawDelayed(500);
+		moveStraightMPAbsolute(-40, MP_AUTON_STRAIGHT_SPEED, 0);
+		wait1Msec(500);
+		armPickupPositionOpenClaw();
+		moveStraightMPAbsolute(32, MP_AUTON_STRAIGHT_SPEED, 0);
+}
+
 task autonomous()
 {
-	// Pre-load star match play auton
+	// Programming skills auton (0 deg gyro is pointing from the fence to the start position)
 	if (autonConfigId1 == 0 && autonConfigId2 == 0) {
-		clawPIDActive = true;
-    setClawTarget(CLAW_AUTON, false);
-    moveStraightMP(-14, MP_AUTON_STRAIGHT_SPEED);
-    wait1Msec(500);
+		SensorValue[GYRO] = 0;
 
-    // Turn on the active software control
+		// Set arm to the pickup position and then open the claw
+	  setLiftArmTarget(LIFTARM_PICKUP, false);
+		setClawTarget(CLAW_AUTON_RELEASE, false);  // claw need to open just enough to not touch the back wheels or go too far and touch the front wheels
+
+		// Turn on the active software control
 		liftArmPIDActive = true;
-
-		// First cube
-    setClawTarget(CLAW_CLOSE, false);
-    wait1Msec(1000);
-		moveStraightMP(-22, MP_AUTON_STRAIGHT_SPEED);
-		armDumpPositionOpenClaw();
-		wait1Msec(200);
-		moveStraightMP(-30, MP_AUTON_STRAIGHT_SPEED);
-		wait1Msec(500);
-		armPickupPositionOpenClaw();
-		moveStraightMP(32, MP_AUTON_STRAIGHT_SPEED);
-	}
-
-	// Programming skills auton
-	else if (autonConfigId1 == 1 && autonConfigId2 == 0) {
 		clawPIDActive = true;
-    setClawTarget(CLAW_AUTON, false);
-    moveStraightMP(-20, MP_AUTON_STRAIGHT_SPEED);
-    wait1Msec(500);
 
-    // Turn on the active software control
-		liftArmPIDActive = true;
-
-		// First cube
-    setClawTarget(CLAW_CLOSE, false);
-    wait1Msec(1000);
-		moveStraightMP(-10, MP_AUTON_STRAIGHT_SPEED);
-		armDumpPositionOpenClaw();
-		wait1Msec(200);
-		moveStraightMP(-30, MP_AUTON_STRAIGHT_SPEED);
-		wait1Msec(500);
-		armPickupPositionOpenClaw();
-		moveStraightMP(32, MP_AUTON_STRAIGHT_SPEED);
-
-		// Second cube
+    wait1Msec(200);  // wait for claw to clear rear wheels
+    moveStraightMPAbsolute(-20, MP_AUTON_STRAIGHT_SPEED, 0);
 		setClawTarget(CLAW_CLOSE, false);
-    wait1Msec(1000);
-		moveStraightMP(-10, MP_AUTON_STRAIGHT_SPEED);
-		armDumpPositionOpenClaw();
-		wait1Msec(200);
-		moveStraightMP(-30, MP_AUTON_STRAIGHT_SPEED);
-		wait1Msec(500);
-		armPickupPositionOpenClaw();
-		moveStraightMP(32, MP_AUTON_STRAIGHT_SPEED);
+    wait1Msec(500);  // wait for human to load and arms to swing extra distance first time
 
-		// 3 stars
-		setClawTarget(CLAW_CLOSE, false);
-    wait1Msec(1000);
-		moveStraightMP(-10, MP_AUTON_STRAIGHT_SPEED);
-		armDumpPositionOpenClaw();
-		wait1Msec(200);
-		moveStraightMP(-30, MP_AUTON_STRAIGHT_SPEED);
-		wait1Msec(500);
-		armPickupPositionOpenClaw();
-		moveStraightMP(32, MP_AUTON_STRAIGHT_SPEED);
+		// First cube (human load)
+		autonCloseClawBackupDumpReturn();
 
-		// center cube
-		tankTurnGyroMP(90, MP_AUTON_TURN_RATE);
-		moveStraightMP(20, MP_AUTON_STRAIGHT_SPEED);
+		// Second cube (human load)
+		autonCloseClawBackupDumpReturn();
+
+		// 3 stars nested together (human load)
+		autonCloseClawBackupDumpReturn();
+
+		// Center cube
+		tankTurnGyroMPAbsolute(90, MP_AUTON_TURN_RATE);
+		moveStraightMPAbsolute(20, MP_AUTON_STRAIGHT_SPEED, 90);
 		setClawTarget(CLAW_CLOSE, false);
 	  setLiftArmTargetDelayed(LIFTARM_HOLD, 700);
 		wait1Msec(900);
-		moveStraightMP(8, MP_AUTON_STRAIGHT_SPEED);
-		tankTurnGyroMP(-90, MP_AUTON_TURN_RATE);
-		moveStraightMP(-31, MP_AUTON_STRAIGHT_SPEED);
+		moveStraightMPAbsolute(8, MP_AUTON_STRAIGHT_SPEED, 90);
+		tankTurnGyroMPAbsolute(0, MP_AUTON_TURN_RATE);
+		moveStraightMPAbsolute(-31, MP_AUTON_STRAIGHT_SPEED, 0);
 		armDumpPositionOpenClaw();
 		wait1Msec(1500);
 
-		// 3 stars on the floor
+		// 3 stars on the floor near back wall
 		armPickupPositionOpenClaw();
-		moveStraightMP(32, MP_AUTON_STRAIGHT_SPEED);
+		moveStraightMPAbsolute(32, MP_AUTON_STRAIGHT_SPEED, 0);
 		setClawTarget(CLAW_CLOSE, false);
 	  setLiftArmTargetDelayed(LIFTARM_HOLD, 700);
 		wait1Msec(900);
-		moveStraightMP(-32, MP_AUTON_STRAIGHT_SPEED);
+		moveStraightMPAbsolute(-32, MP_AUTON_STRAIGHT_SPEED, 0);
 		armDumpPositionOpenClaw();
 	}
 
-	// Three center stars match play auton
+	// 1 pre-load star match play auton (0 deg gyro is pointing from the fence to the start position)
+	else if (autonConfigId1 == 1 && autonConfigId2 == 0) {
+		SensorValue[GYRO] = 0;
+
+		clawPIDActive = true;
+    setClawTarget(CLAW_AUTON, false);
+    moveStraightMPAbsolute(-14, MP_AUTON_STRAIGHT_SPEED, 0);
+    wait1Msec(500);
+
+    // Turn on the active software control
+		liftArmPIDActive = true;
+
+		// First cube
+    setClawTarget(CLAW_CLOSE, false);
+    wait1Msec(1000);
+		moveStraightMPAbsolute(-22, MP_AUTON_STRAIGHT_SPEED, 0);
+		armDumpPositionOpenClaw();
+		wait1Msec(200);
+		moveStraightMPAbsolute(-30, MP_AUTON_STRAIGHT_SPEED, 0);
+		wait1Msec(500);
+		armPickupPositionOpenClaw();
+		moveStraightMPAbsolute(32, MP_AUTON_STRAIGHT_SPEED, 0);
+	}
+
+	// Three center stars match play auton (0 deg gyro is pointing from start position to the climbing pole)
 	else if (autonConfigId1 == 0 && autonConfigId2 == 1) {
-    wait1Msec(3000);
+		SensorValue[GYRO] = 0;
+
 		clawPIDActive = true;
     setClawTarget(CLAW_AUTON, false);
     wait1Msec(500);
@@ -1031,56 +1035,20 @@ task autonomous()
     armPickupPositionOpenClaw();
     wait1Msec(700);
 
-    moveStraightMP(48, MP_AUTON_STRAIGHT_SPEED);
+    moveStraightMPAbsolute(48, MP_AUTON_STRAIGHT_SPEED, 0);
 	  setLiftArmTargetDelayed(LIFTARM_HOLD, 700);
     wait1Msec(500);
 
-    tankTurnGyroMP(-90, MP_AUTON_TURN_RATE);
+    tankTurnGyroMPAbsolute(-90, MP_AUTON_TURN_RATE);
 
-		moveStraightMP(-24, MP_AUTON_STRAIGHT_SPEED);
+		moveStraightMPAbsolute(-24, MP_AUTON_STRAIGHT_SPEED, -90);
 		armDumpPositionOpenClaw();
 		wait1Msec(200);
-		moveStraightMP(-30, MP_AUTON_STRAIGHT_SPEED);
+		moveStraightMPAbsolute(-30, MP_AUTON_STRAIGHT_SPEED, -90);
 		wait1Msec(500);
 	}
 
-	/*
-
-	// Match play auton center cube to wall
-	else if (autonConfigId1 == 1 && autonConfigId2 == 1) {
-		// Set arm to the pickup position and then open the claw
-	  setLiftArmTarget(LIFTARM_PICKUP, false);
-		setClawTarget(CLAW_OPEN, false);
-
-		// Turn on the active software control
-		liftArmPIDActive = true;
-		clawPIDActive = true;
-
-		// Start auton routine
-		moveStraightMP(24, MP_AUTON_STRAIGHT_SPEED);
-		tankTurnGyroMP(-90, MP_AUTON_TURN_RATE);
-		moveStraightMP(20, MP_AUTON_STRAIGHT_SPEED);
-
-		setClawTarget(CLAW_CLOSE, false);
-	  setLiftArmTargetDelayed(LIFTARM_HOLD, 700);
-		wait1Msec(900);
-
-		moveStraightMP(8, MP_AUTON_STRAIGHT_SPEED);
-		tankTurnGyroMP(-90, MP_AUTON_TURN_RATE);
-		moveStraightMP(-31, MP_AUTON_STRAIGHT_SPEED);
-
-		armDumpPositionOpenClaw();
-		wait1Msec(500);
-		setClawTarget(CLAW_STRAIGHT, false);
-	  moveStraightMP(24, MP_AUTON_STRAIGHT_SPEED);
-		tankTurnGyroMP(-180, MP_AUTON_TURN_RATE);
-	  setLiftArmTarget(LIFTARM_STAR_LIFT_LOW, true);
-//	  moveStraightMP(2, MP_AUTON_STRAIGHT_SPEED);
-//	  setLiftArmTarget(LIFTARM_STAR_LIFT_HIGH, true);
-	}
-*/
-
-	// Match play auton center cube to wall
+	// Center cube to fence match play auton (0 deg gyro is pointing from the start position to the fence)
 	else if (autonConfigId1 == 1 && autonConfigId2 == 1) {
 		SensorValue[GYRO] = 0;
 
