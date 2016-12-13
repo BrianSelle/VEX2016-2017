@@ -937,10 +937,10 @@ void pre_auton()
 void autonCloseClawBackupDumpReturn() {
 		setClawTarget(CLAW_CLOSE, false);
 	  setLiftArmTargetDelayed(LIFTARM_LOW_HOLD, 700);
-    wait1Msec(1000);
+    wait1Msec(500);
 		armDumpPositionOpenClawDelayed(500);
 		moveStraightMPAbsolute(-40, MP_AUTON_STRAIGHT_SPEED, 0);
-		wait1Msec(500);
+		wait1Msec(200);
 		armPickupPositionOpenClaw();
 		moveStraightMPAbsolute(32, MP_AUTON_STRAIGHT_SPEED, 0);
 }
@@ -971,9 +971,60 @@ task autonomous()
 		autonCloseClawBackupDumpReturn();
 
 		// 3 stars nested together (human load)
-		autonCloseClawBackupDumpReturn();
+		setClawTarget(CLAW_CLOSE, false);
+	  setLiftArmTargetDelayed(LIFTARM_LOW_HOLD, 700);
+    wait1Msec(500);
+		armDumpPositionOpenClawDelayed(500);
+		moveStraightMPAbsolute(-40, MP_AUTON_STRAIGHT_SPEED, 0);
+		wait1Msec(800);
+	  setLiftArmTarget(LIFTARM_HOLD, false);
+		setClawTarget(CLAW_OPEN, false);
+
+		// Turn 90 and drive along fence to get 3 stars
+		moveStraightMPAbsolute(8, MP_AUTON_STRAIGHT_SPEED, 0);
+		tankTurnGyroMPAbsolute(90, MP_AUTON_TURN_RATE);
+		armPickupPositionOpenClaw();
+		setClawTarget(CLAW_MID, false);
+		wait1Msec(800);
+		moveStraightMPAbsolute(70, MP_AUTON_STRAIGHT_SPEED, 90);
+		setClawTarget(CLAW_CLOSE, false);
+	  setLiftArmTargetDelayed(LIFTARM_HOLD, 700);
+    wait1Msec(500);
+		tankTurnGyroMPAbsolute(0, MP_AUTON_TURN_RATE);
+		moveStraightMPAbsolute(-6, MP_AUTON_STRAIGHT_SPEED, 0);
+		armDumpPositionOpenClaw();
+		wait1Msec(500);
+
+		// Cube on the other colored square
+		armPickupPositionOpenClaw();
+		moveStraightMPAbsolute(30, MP_AUTON_STRAIGHT_SPEED, 0);
+		setClawTarget(CLAW_CLOSE, false);
+	  setLiftArmTargetDelayed(LIFTARM_LOW_HOLD, 700);
+    wait1Msec(500);
+		armDumpPositionOpenClawDelayed(500);
+		moveStraightMPAbsolute(-40, MP_AUTON_STRAIGHT_SPEED, 0);
+		wait1Msec(200);
+
+		// Get 3 stars along back wall
+		moveStraightMPAbsolute(55, MP_AUTON_STRAIGHT_SPEED, 0);
+		moveStraightMPAbsolute(-2, MP_AUTON_STRAIGHT_SPEED, 0);
+		tankTurnGyroMPAbsolute(-90, MP_AUTON_TURN_RATE);
+		moveStraightMPAbsolute(-12, MP_AUTON_STRAIGHT_SPEED, -90);
+		armPickupPositionOpenClaw();
+    wait1Msec(1000);
+		moveStraightMPAbsolute(75, MP_AUTON_STRAIGHT_SPEED, -90);
+		setClawTarget(CLAW_CLOSE, false);
+	  setLiftArmTargetDelayed(LIFTARM_HOLD, 700);
+    wait1Msec(500);
+    tankTurnGyroMPAbsolute(0, MP_AUTON_TURN_RATE);
+		moveStraightMPAbsolute(-10, MP_AUTON_STRAIGHT_SPEED, 0);
+    armDumpPositionOpenClawDelayed(500);
+		moveStraightMPAbsolute(-40, MP_AUTON_STRAIGHT_SPEED, 0);
+		wait1Msec(800);
 
 		// Center cube
+		armPickupPositionOpenClaw();
+		moveStraightMPAbsolute(20, MP_AUTON_STRAIGHT_SPEED, 0);
 		tankTurnGyroMPAbsolute(90, MP_AUTON_TURN_RATE);
 		moveStraightMPAbsolute(20, MP_AUTON_STRAIGHT_SPEED, 90);
 		setClawTarget(CLAW_CLOSE, false);
@@ -981,7 +1032,7 @@ task autonomous()
 		wait1Msec(900);
 		moveStraightMPAbsolute(8, MP_AUTON_STRAIGHT_SPEED, 90);
 		tankTurnGyroMPAbsolute(0, MP_AUTON_TURN_RATE);
-		moveStraightMPAbsolute(-31, MP_AUTON_STRAIGHT_SPEED, 0);
+		moveStraightMPAbsolute(-20, MP_AUTON_STRAIGHT_SPEED, 0);
 		armDumpPositionOpenClaw();
 		wait1Msec(1500);
 
@@ -993,6 +1044,7 @@ task autonomous()
 		wait1Msec(900);
 		moveStraightMPAbsolute(-32, MP_AUTON_STRAIGHT_SPEED, 0);
 		armDumpPositionOpenClaw();
+
 	}
 
 	// 1 pre-load star match play auton (0 deg gyro is pointing from the fence to the start position)
