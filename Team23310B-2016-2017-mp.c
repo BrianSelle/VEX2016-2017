@@ -1075,28 +1075,29 @@ task autonomous()
 	else if (autonConfigId1 == 0 && autonConfigId2 == 1) {
 		SensorValue[GYRO] = 0;
 
-		clawPIDActive = true;
     setClawTarget(CLAW_AUTON, false);
-    wait1Msec(500);
+		clawPIDActive = true;
+    wait1Msec(200);
 
     // Turn on the active software control
-	  setLiftArmTargetDelayed(LIFTARM_HOLD, 700);
 		liftArmPIDActive = true;
-    wait1Msec(700);
+	  setLiftArmTarget(LIFTARM_HOLD, false);
+    wait1Msec(500);
 
-    armPickupPositionOpenClaw();
-    wait1Msec(700);
+		setClawTarget(CLAW_MID, true);
+		setLiftArmTarget(LIFTARM_PICKUP, false);
+    wait1Msec(500);
 
-    moveStraightMPAbsolute(48, MP_AUTON_STRAIGHT_SPEED, 0);
+    moveStraightMPAbsolute(37, MP_AUTON_STRAIGHT_SPEED, 0);
+		setClawTarget(CLAW_CLOSE, false);
 	  setLiftArmTargetDelayed(LIFTARM_HOLD, 700);
     wait1Msec(500);
 
+    moveStraightMPAbsolute(-48, MP_AUTON_STRAIGHT_SPEED, 0);
     tankTurnGyroMPAbsolute(-90, MP_AUTON_TURN_RATE);
 
-		moveStraightMPAbsolute(-24, MP_AUTON_STRAIGHT_SPEED, -90);
+		moveStraightMPAbsolute(-48, MP_AUTON_STRAIGHT_SPEED, -90);
 		armDumpPositionOpenClaw();
-		wait1Msec(200);
-		moveStraightMPAbsolute(-30, MP_AUTON_STRAIGHT_SPEED, -90);
 		wait1Msec(500);
 	}
 
