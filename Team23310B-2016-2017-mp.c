@@ -25,17 +25,6 @@
 
 #include "Vex_Competition_Includes.c"   //Main competition background code...do not modify!
 
-// We have 8 possible places to store data, we call each one a datalog series
-// This example uses the first four to store values.
-#define   DATALOG_SERIES_0    0
-#define   DATALOG_SERIES_1    1
-#define   DATALOG_SERIES_2    2
-#define   DATALOG_SERIES_3    3
-#define   DATALOG_SERIES_4    4
-#define   DATALOG_SERIES_5    5
-#define   DATALOG_SERIES_6    6
-#define   DATALOG_SERIES_7    7
-
 // Red/blue team
 bool isRedTeam = false;
 int autonConfigId1 = 0;
@@ -209,16 +198,6 @@ void updateClawPosition()
 	float clawPower = (float)clawError * CLAW_KP + (float)diffClawError * CLAW_KD + CLAW_FF;
 	setClawPower((int)clawPower);
 
-  // datalogAddValue when surrounded by datalogDataGroupStart and datalogDataGroupEnd
-  // adds several values to one row of the datalog with a common time stamp
-  //datalogDataGroupStart();
-  //datalogAddValue( DATALOG_SERIES_0, targetClawValue );
-  //datalogAddValue( DATALOG_SERIES_1, currentClawEncoderValue );
-  //datalogAddValue( DATALOG_SERIES_2, clawError );
-  //datalogAddValue( DATALOG_SERIES_3, clawPower );
-  //datalogAddValue( DATALOG_SERIES_4, limitedClawPower );
-  //datalogDataGroupEnd();
-
 	if (abs(clawError) < CLAW_ERROR_TOLERANCE) {
 		isClawAtTarget = true;
 	}
@@ -294,16 +273,6 @@ void updateLiftArmPosition()
 
 	float liftArmPower = (float)liftArmError * LIFTARM_KP + (float)diffLiftArmError * LIFTARM_KD + LIFTARM_FF;
 	setLiftArmPower((int)liftArmPower);
-
-  // datalogAddValue when surrounded by datalogDataGroupStart and datalogDataGroupEnd
-  // adds several values to one row of the datalog with a common time stamp
-  //datalogDataGroupStart();
-  //datalogAddValue( DATALOG_SERIES_0, targetLiftArmValue );
-  //datalogAddValue( DATALOG_SERIES_1, currentLiftArmEncoderValue );
-  //datalogAddValue( DATALOG_SERIES_2, liftArmError );
-  //datalogAddValue( DATALOG_SERIES_3, liftArmPower );
-  //datalogAddValue( DATALOG_SERIES_4, limitedLiftArmPower );
-  //datalogDataGroupEnd();
 
 	if (abs(liftArmError) < LIFTARM_ERROR_TOLERANCE) {
 		isLiftArmAtTarget = true;
@@ -661,15 +630,8 @@ void updateStraightController(float time, float position, float velocity, float 
 		int rightMotorPower = distanceMotorPower - turnMotorPower;
 
 		setDriveMotorPower(leftMotorPower, rightMotorPower);
-/*
-		datalogDataGroupStart();
-		datalogAddValue( DATALOG_SERIES_0, mpDist );
-		datalogAddValue( DATALOG_SERIES_1, mpVel );
-		datalogAddValue( DATALOG_SERIES_2, mpAccel );
-		datalogAddValue( DATALOG_SERIES_3, distanceCountError );
-		datalogAddValue( DATALOG_SERIES_4, distanceMotorPower );
-		datalogDataGroupEnd();
-*/
+
+		// The outer mp point loop runs at 100hz, this loop runs at roughly 1000hz
 		wait1Msec(1);
 	}
 }
@@ -687,15 +649,8 @@ void updateTurnController(float time, float position, float velocity, float acce
 		int rightMotorPower = -turnMotorPower;
 
 		setDriveMotorPower(leftMotorPower, rightMotorPower);
-/*
-		datalogDataGroupStart();
-		datalogAddValue( DATALOG_SERIES_0, mpDist );
-		datalogAddValue( DATALOG_SERIES_1, mpVel );
-		datalogAddValue( DATALOG_SERIES_2, mpAccel );
-		datalogAddValue( DATALOG_SERIES_3, distanceCountError );
-		datalogAddValue( DATALOG_SERIES_4, distanceMotorPower );
-		datalogDataGroupEnd();
-*/
+
+		// The outer mp point loop runs at 100hz, this loop runs at roughly 1000hz
 		wait1Msec(1);
 	}
 }
