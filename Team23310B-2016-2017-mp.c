@@ -38,6 +38,7 @@ float CLAW_KD = 0.0;
 float CLAW_FF = 0.0;
 
 int CLAW_CLOSE = 360.0;
+int CLAW_MID_AUTON = 790.0;
 int CLAW_MID = 1000.0;
 int CLAW_OPEN = 1450.0;
 int CLAW_STRAIGHT = 1760;
@@ -64,8 +65,8 @@ int LIFTARM_CLIMB_LOAD = 925.0;
 int LIFTARM_LOW_HOLD = 700.0;
 int LIFTARM_HOLD = 1600.0; // 1800;
 int LIFTARM_DUMP = 2800.0;
-int LIFTARM_STAR_LIFT_LOW = 1000.0;
-int LIFTARM_STAR_LIFT_HIGH = 1915.0;
+int LIFTARM_STAR_LIFT_LOW = 1034.0;
+int LIFTARM_STAR_LIFT_HIGH = 1886.0;
 int LIFTARM_CLIMB_LIFT = 3400.0;
 int LIFTARM_DUMP_CLAW_OPEN = 1750; // 2000;
 
@@ -941,9 +942,9 @@ task autonomous()
 		moveStraightMPAbsolute(8, MP_AUTON_STRAIGHT_SPEED, 0);
 		tankTurnGyroMPAbsolute(90, MP_AUTON_TURN_RATE);
 		armPickupPositionOpenClaw();
-		setClawTarget(CLAW_MID, false);
+		setClawTarget(CLAW_MID_AUTON, false);
 		wait1Msec(800);
-		moveStraightMPAbsolute(70, MP_AUTON_STRAIGHT_SPEED, 90);
+		moveStraightMPAbsolute(71, MP_AUTON_STRAIGHT_SPEED, 90);
 		setClawTarget(CLAW_CLOSE, false);
 	  setLiftArmTargetDelayed(LIFTARM_HOLD, 700);
     wait1Msec(500);
@@ -954,13 +955,16 @@ task autonomous()
 
 		// Cube on the other colored square
 		armPickupPositionOpenClaw();
-		moveStraightMPAbsolute(30, MP_AUTON_STRAIGHT_SPEED, 0);
+		wait1Msec(700);
+		moveStraightMPAbsolute(33, MP_AUTON_STRAIGHT_SPEED, 0);
 		setClawTarget(CLAW_CLOSE, false);
 	  setLiftArmTargetDelayed(LIFTARM_LOW_HOLD, 700);
     wait1Msec(500);
 		armDumpPositionOpenClawDelayed(500);
 		moveStraightMPAbsolute(-40, MP_AUTON_STRAIGHT_SPEED, 0);
-		wait1Msec(200);
+		wait1Msec(700);
+		setLiftArmTargetDelayed(LIFTARM_HOLD, 100);
+		wait1Msec(500);
 
 		// Get 3 stars along back wall
 		moveStraightMPAbsolute(55, MP_AUTON_STRAIGHT_SPEED, 0);
@@ -968,22 +972,23 @@ task autonomous()
 		tankTurnGyroMPAbsolute(-90, MP_AUTON_TURN_RATE);
 		moveStraightMPAbsolute(-12, MP_AUTON_STRAIGHT_SPEED, -90);
 		armPickupPositionOpenClaw();
+		setClawTarget(CLAW_MID_AUTON, false);
     wait1Msec(1000);
 		moveStraightMPAbsolute(75, MP_AUTON_STRAIGHT_SPEED, -90);
 		setClawTarget(CLAW_CLOSE, false);
 	  setLiftArmTargetDelayed(LIFTARM_HOLD, 700);
     wait1Msec(500);
     tankTurnGyroMPAbsolute(0, MP_AUTON_TURN_RATE);
-		moveStraightMPAbsolute(-10, MP_AUTON_STRAIGHT_SPEED, 0);
+		moveStraightMPAbsolute(-20, MP_AUTON_STRAIGHT_SPEED, 0);
     armDumpPositionOpenClawDelayed(500);
 		moveStraightMPAbsolute(-40, MP_AUTON_STRAIGHT_SPEED, 0);
 		wait1Msec(800);
 
 		// Center cube
 		armPickupPositionOpenClaw();
-		moveStraightMPAbsolute(20, MP_AUTON_STRAIGHT_SPEED, 0);
+		moveStraightMPAbsolute(25, MP_AUTON_STRAIGHT_SPEED, 0);
 		tankTurnGyroMPAbsolute(90, MP_AUTON_TURN_RATE);
-		moveStraightMPAbsolute(20, MP_AUTON_STRAIGHT_SPEED, 90);
+		moveStraightMPAbsolute(27, MP_AUTON_STRAIGHT_SPEED, 90);
 		setClawTarget(CLAW_CLOSE, false);
 	  setLiftArmTargetDelayed(LIFTARM_HOLD, 700);
 		wait1Msec(900);
@@ -994,14 +999,14 @@ task autonomous()
 		wait1Msec(1500);
 
 		// 3 stars on the floor near back wall
-		armPickupPositionOpenClaw();
+/*		armPickupPositionOpenClaw();
 		moveStraightMPAbsolute(32, MP_AUTON_STRAIGHT_SPEED, 0);
 		setClawTarget(CLAW_CLOSE, false);
 	  setLiftArmTargetDelayed(LIFTARM_HOLD, 700);
 		wait1Msec(900);
 		moveStraightMPAbsolute(-32, MP_AUTON_STRAIGHT_SPEED, 0);
 		armDumpPositionOpenClaw();
-
+*/
 	}
 
 	// 1 pre-load star match play auton (0 deg gyro is pointing from the fence to the start position)
@@ -1074,14 +1079,14 @@ task autonomous()
 
 		// Set arm to the pickup position and then open the claw
 	  setLiftArmTarget(LIFTARM_PICKUP, false);
-		setClawTarget(CLAW_OPEN, false);
+		setClawTarget(CLAW_MID, false);
 
 		// Turn on the active software control
 		liftArmPIDActive = true;
 		clawPIDActive = true;
 
 		// Start auton routine
-		moveStraightMPAbsolute(24, MP_AUTON_STRAIGHT_SPEED, 0);
+		moveStraightMPAbsolute(21, MP_AUTON_STRAIGHT_SPEED, 0);
 		tankTurnGyroMPAbsolute(-90, MP_AUTON_TURN_RATE);
 		moveStraightMPAbsolute(20, MP_AUTON_STRAIGHT_SPEED, -90);
 
@@ -1097,10 +1102,9 @@ task autonomous()
 		wait1Msec(500);
 		setClawTarget(CLAW_STRAIGHT, false);
 	  moveStraightMPAbsolute(24, MP_AUTON_STRAIGHT_SPEED, -180);
-		tankTurnGyroMPAbsolute(-1, MP_AUTON_TURN_RATE);
-	  setLiftArmTarget(LIFTARM_STAR_LIFT_LOW, true);
-//	  moveStraightMP(2, MP_AUTON_STRAIGHT_SPEED);
-//	  setLiftArmTarget(LIFTARM_STAR_LIFT_HIGH, true);
+		tankTurnGyroMPAbsolute(0, MP_AUTON_TURN_RATE);
+	  setLiftArmTarget(LIFTARM_STAR_LIFT_HIGH, true);
+	  moveStraightMP(22, MP_AUTON_STRAIGHT_SPEED);
 	}
 
 }
