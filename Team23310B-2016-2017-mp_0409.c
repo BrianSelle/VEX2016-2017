@@ -936,6 +936,7 @@ void startClimbAuton() {
 
     setLiftArmTarget(LIFTARM_CLIMB_LIFT, true);
     setLiftArmTarget(LIFTARM_CLIMB_LOAD, true);
+    //moveStraightMPAbsolute(30, MP_AUTON_STRAIGHT_SPEED, 0);
 		tankTurnGyroMPAbsolute(-135, MP_AUTON_TURN_RATE);
     moveStraightMPAbsolute(-13, MP_AUTON_STRAIGHT_SPEED, -135);
     setLiftArmTarget(LIFTARM_CLIMB_LIFT, true);
