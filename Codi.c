@@ -956,6 +956,13 @@ void startClimbAuton() {
 	moveStraightTime(-40, 2000);
 }
 
+
+
+
+
+
+
+
 void startAuton() {
 
 	// New worlds Programming skills auton (0 deg gyro is pointing from the fence to the start position)
@@ -1074,6 +1081,12 @@ void startAuton() {
 		setLiftArmTarget(LIFTARM_CLIMB_LIFT, true);
 
 	}
+
+
+
+
+
+
 
 	// OLD Programming skills auton (0 deg gyro is pointing from the fence to the start position)
 	else if (autonConfigId1 == 0 && autonConfigId2 == 1 && autonConfigId3 == 1) {
@@ -1396,19 +1409,19 @@ task usercontrol()
 		}
 
 		// Climb load position
-		else if(vexRT[Btn7D] == 1)
-		{
-			startClimbAuton();
-			// 	if (liftArmPIDActive) {
-			// 		setLiftArmTarget(LIFTARM_CLIMB_LOAD, false);
-			//}
-			// 	else {
-			// 		setLiftArmPower(-127);
-			// 	}
-		}
+		/////		else if(vexRT[Btn7D] == 1)
+		//////		{
+		/////		startClimbAuton();
+		// 	if (liftArmPIDActive) {
+		// 		setLiftArmTarget(LIFTARM_CLIMB_LOAD, false);
+		//}
+		// 	else {
+		// 		setLiftArmPower(-127);
+		// 	}
+		/////		}
 
 		// Climb lift position
-		else if(vexRT[Btn7U] == 1)
+		else if(vexRT[Btn7D] == 1)
 		{
 			startAuton();
 			// 	if (liftArmPIDActive) {
